@@ -1,0 +1,6 @@
+{
+  "name": "Drishti - Satellite & Land Record Verification Platform",
+  "description": "Production-grade geospatial intelligence system combining real-time Sentinel-2 satellite imagery analysis, YOLO structure detection, and government revenue land record verification.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

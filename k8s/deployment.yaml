@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drishti-backend
+  namespace: drishti
+  labels:
+    app.kubernetes.io/name: drishti-backend
+    app.kubernetes.io/part-of: drishti-system
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: drishti-backend
+  template:
+    metadata:
+      labels:
+        app: drishti-backend
+    spec:
+      containers:
+      - name: drishti-app
+        image: asia-south1-docker.pkg.dev/drishti-prod-project/drishti-repo/drishti-app:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: drishti-secrets
+              key: database-url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: drishti-secrets
+              key: jwt-secret
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "2"
+            memory: "3Gi"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 20
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: drishti-service
+  namespace: drishti
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: drishti-backend
